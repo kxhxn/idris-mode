@@ -1,5 +1,5 @@
 (uiop:define-package idris-mode/lsp-config
-  (:use :cl :lem-lsp-mode :lem-lsp-base/type))
+  (:use :cl :lem-lsp-mode))
 
 (in-package :idris-mode/lsp-config)
 

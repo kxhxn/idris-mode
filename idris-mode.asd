@@ -2,19 +2,12 @@
   :version "0.0.1"
   :author ""
   :license ""
-  :depends-on ("lem/core" "lem-tree-sitter" "lem-lsp-mode")
+  :depends-on ("lem/core" "lem-lsp-mode")
   :serial t
   :components ((:module "src"
                 :components
                 ((:file "main")
-                 (:file "lsp-config")
-                 (:module "tree-sitter"
-                  :components
-                  ((:static-file "highlights.scm")))
-                 ))
-               ;; (:module "tree-sitter"
-               ;; :components ((:static-file "highlights.scm")))
-               )
+                 (:file "lsp-config"))))
   :description "Major mode for Idris"
   :in-order-to ((test-op (test-op "idris-mode/tests"))))
 
