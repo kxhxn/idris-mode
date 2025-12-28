@@ -1,5 +1,5 @@
 (uiop:define-package idris-mode
-    (:use :cl :lem :lem/language-mode :lem/language-mode-tools)
+  (:use :cl :lem :lem/language-mode :lem/language-mode-tools)
   (:export :idris-mode
            :*idris-mode-hook*))
 (in-package :idris-mode)
@@ -23,24 +23,24 @@
 
 (defun tokens (boundary strings)
   (let ((alternation
-         `(:alternation ,@(sort (copy-list strings) #'> :key #'length))))
+          `(:alternation ,@(sort (copy-list strings) #'> :key #'length))))
     (if boundary
         `(:sequence ,boundary ,alternation ,boundary)
         alternation)))
 
 (defun make-tmlanguage-idris ()
   (let ((patterns
-         (make-tm-patterns
-          (make-tm-line-comment-region "--")
-          (make-tm-block-comment-region "{-" "-}")
-          (make-tm-string-region "\"")
-          (make-tm-match (tokens :word-boundary *idris-keywords*)
-                         :name 'syntax-keyword-attribute)
-          (make-tm-match *integer-literals*
-                         :name 'syntax-constant-attribute)
-          (make-tm-match *float-literals*
-                         :name 'syntax-constant-attribute)
-          )))
+          (make-tm-patterns
+           (make-tm-line-comment-region "--")
+           (make-tm-block-comment-region "{-" "-}")
+           (make-tm-string-region "\"")
+           (make-tm-match (tokens :word-boundary *idris-keywords*)
+                          :name 'syntax-keyword-attribute)
+           (make-tm-match *integer-literals*
+                          :name 'syntax-constant-attribute)
+           (make-tm-match *float-literals*
+                          :name 'syntax-constant-attribute)
+           )))
     (make-tmlanguage :patterns patterns)))
 
 (defvar *idris-syntax-table*
@@ -58,12 +58,30 @@
     table))
 
 
+;; Tree-sitter
+(defun tree-sitter-query-path ()
+  "Return the path to the tree-sitter highlight query."
+  (asdf:system-relative-pathname :idris-mode "tree-sitter/highlights.scm"))
+
+;; Handle tree-sitter fallback
+(defun try-enable-tree-sitter ()
+  "Try to enable tree-sitter, returning T on success, NIL on failure."
+  (ignore-errors
+    (when (and (find-package :lem-tree-sitter)
+               (funcall (find-symbol "TREE-SITTER-AVAILABLE-P" :lem-tree-sitter)))
+      (funcall (find-symbol "ENABLE-TREE-SITTER-FOR-MODE" :lem-tree-sitter)
+               *idris-syntax-table* "idris" (tree-sitter-query-path))
+      t)))
+
 ;; Define major mode
 (define-major-mode idris-mode ()
-  (:name "Idris"
-	 ;; :keymap *idris-mode-keymap*
-	 :mode-hook *idris-mode-hook*
-	 :syntax-table *idris-syntax-table*)
+    (:name "Idris"
+     ;; :keymap *idris-mode-keymap*
+     :mode-hook *idris-mode-hook*
+     :syntax-table *idris-syntax-table*)
+  ;; enable tree-sitter
+  (try-enable-tree-sitter)
+  ;; set mode variables
   (setf (variable-value 'enable-syntax-highlight) t
         (variable-value 'tab-width) 2))
 
